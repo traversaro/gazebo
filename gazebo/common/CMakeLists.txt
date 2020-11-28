@@ -249,11 +249,11 @@ target_link_libraries(gazebo_common
     ${tinyxml_LIBRARIES}
   PRIVATE
     ${libtool_library}
-    ${libavcodec_LIBRARIES}
-    ${libavformat_LIBRARIES}
-    ${libavutil_LIBRARIES}
-    ${libavdevice_LIBRARIES}
-    ${libswscale_LIBRARIES}
+    ${libavcodec_LINK_LIBRARIES}
+    ${libavformat_LINK_LIBRARIES}
+    ${libavutil_LINK_LIBRARIES}
+    ${libavdevice_LINK_LIBRARIES}
+    ${libswscale_LINK_LIBRARIES}
     ${TBB_LIBRARIES}
 )
 

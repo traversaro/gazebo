@@ -249,13 +249,25 @@ target_link_libraries(gazebo_common
     ${tinyxml_LIBRARIES}
   PRIVATE
     ${libtool_library}
-    ${libavcodec_LIBRARIES}
-    ${libavformat_LIBRARIES}
-    ${libavutil_LIBRARIES}
-    ${libavdevice_LIBRARIES}
-    ${libswscale_LIBRARIES}
     ${TBB_LIBRARIES}
 )
+
+if (HAVE_FFMPEG)
+  target_link_libraries(gazebo_common
+    PRIVATE
+      SWSCALE::SWSCALE
+      AVDEVICE::AVDEVICE
+      AVFORMAT::AVFORMAT
+      AVUTIL::AVUTIL
+  ) 
+endif()
+
+if (HAVE_AVCODEC)
+  target_link_libraries(gazebo_common
+    PRIVATE
+      AVCODEC::AVCODEC
+  ) 
+endif()
 
 if (UNIX)
   target_link_libraries(gazebo_common PRIVATE pthread)

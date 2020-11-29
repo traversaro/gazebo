@@ -461,64 +461,57 @@ if (PKG_CONFIG_FOUND)
   # else (NOT OAL_FOUND)
   #   set (HAVE_OPENAL TRUE)
   # endif ()
-
+  
   ########################################
-  # Find libswscale format
-  pkg_check_modules(libswscale libswscale)
-  if (NOT libswscale_FOUND)
-    BUILD_WARNING ("libswscale not found. Audio-video capabilities will be disabled.")
+  # Find ignition cmake library
+  find_package(ignition-cmake2 QUIET)
+  if (NOT ignition-cmake2_FOUND)
+    message(STATUS "Looking for ignition-cmake2-config.cmake - not found")
+    BUILD_ERROR ("Missing: Ignition CMake 2")
   else()
-    include_directories(${libswscale_INCLUDE_DIRS})
-    link_directories(${libswscale_LIBRARY_DIRS})
-  endif ()
-
-  ########################################
-  # Find AV device. Only check for this on linux.
-  if (UNIX)
-    pkg_check_modules(libavdevice libavdevice>=56.4.100)
-    if (NOT libavdevice_FOUND)
-      BUILD_WARNING ("libavdevice not found. Recording to a video device will be disabled.")
-    else()
-      include_directories(${libavdevice_INCLUDE_DIRS})
-      link_directories(${libavdevice_LIBRARY_DIRS})
-    endif ()
-  endif ()
-
-  if (NOT libavdevice_FOUND)
-    set (HAVE_AVDEVICE False)
-  else()
-    set (HAVE_AVDEVICE True)
+    message(STATUS "Looking for ignition-cmake2-config.cmake - found")
   endif()
 
   ########################################
-  # Find AV format
-  pkg_check_modules(libavformat libavformat)
-  if (NOT libavformat_FOUND)
-    BUILD_WARNING ("libavformat not found. Audio-video capabilities will be disabled.")
+  # Find libswscale format
+  find_package(SWSCALE QUIET)
+  if (NOT SWSCALE_FOUND)
+    BUILD_WARNING ("libswscale not found. Audio-video capabilities will be disabled.")
+  endif ()
+
+  ########################################
+  # Find AV device.
+  find_package(AVDEVICE QUIET)
+  if(NOT AVDEVICE_FOUND)  
+    BUILD_WARNING ("libavdevice not found. Recording to a video device will be disabled.")
+    set(HAVE_AVDEVICE False)
   else()
-    include_directories(${libavformat_INCLUDE_DIRS})
-    link_directories(${libavformat_LIBRARY_DIRS})
+    set(HAVE_AVDEVICE True)
+  endif ()
+
+  ########################################
+  # Find AV format
+  find_package(AVFORMAT QUIET)
+  if (NOT AVFORMAT_FOUND)
+    BUILD_WARNING ("libavformat not found. Audio-video capabilities will be disabled.")
   endif ()
 
   ########################################
   # Find avcodec
-  pkg_check_modules(libavcodec libavcodec)
-  if (NOT libavcodec_FOUND)
+  find_package(AVCODEC QUIET)
+  if (NOT AVCODEC_FOUND)
     BUILD_WARNING ("libavcodec not found. Audio-video capabilities will be disabled.")
-  else()
-    include_directories(${libavcodec_INCLUDE_DIRS})
-    link_directories(${libavcodec_LIBRARY_DIRS})
   endif ()
 
   ########################################
   # Find avutil
-  pkg_check_modules(libavutil libavutil)
-  if (NOT libavutil_FOUND)
+  find_package(AVUTIL QUIET)
+  if (NOT AVUTIL_FOUND)
     BUILD_WARNING ("libavutil not found. Audio-video capabilities will be disabled.")
   endif ()
 
-  if (libavutil_FOUND AND libavformat_FOUND AND libavcodec_FOUND AND
-      libswscale_FOUND)
+  if (AVUTIL_FOUND AND AVFORMAT_FOUND AND AVCODEC_FOUND AND
+      SWSCALE_FOUND)
     set (HAVE_FFMPEG TRUE)
   else ()
     set (HAVE_FFMPEG FALSE)

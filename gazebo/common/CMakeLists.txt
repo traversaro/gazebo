@@ -283,6 +283,12 @@ if (USE_PCH)
   add_pch(gazebo_common common_pch.hh ${MORE_FLAGS})
 endif()
 
+set_target_properties(gazebo_common
+  PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE
+    SKIP_BUILD_RPATH FALSE
+    INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
+)
 
 gz_install_library(gazebo_common)
 gz_install_includes("common" ${headers_install} ${CMAKE_CURRENT_BINARY_DIR}/common.hh)

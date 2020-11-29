@@ -147,6 +147,8 @@ endmacro ()
 macro (gz_setup_unix)
     # Using dynamic linking in UNIX by default
     set(BUILD_SHARED_LIBS TRUE)
+    # Workaround for https://github.com/conda-forge/cmake-feedstock/issues/129
+    add_link_options("-L${CMAKE_INSTALL_PREFIX}/lib")
 endmacro()
 
 #################################################

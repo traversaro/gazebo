@@ -79,7 +79,7 @@ macro (BUILD_ERROR)
   foreach (str ${ARGN})
     SET (msg "\t${str}")
     MESSAGE (STATUS ${msg})
-    APPEND_TO_CACHED_LIST(build_errors "build errors" ${msg})
+    APPEND_TO_CACHED_LIST(build_errors "build errors" ${msgf})
   endforeach ()
 endmacro (BUILD_ERROR)
 
@@ -147,6 +147,8 @@ endmacro ()
 macro (gz_setup_unix)
     # Using dynamic linking in UNIX by default
     set(BUILD_SHARED_LIBS TRUE)
+    # Workaround for https://github.com/conda-forge/cmake-feedstock/issues/129
+    add_link_options("-L${CMAKE_INSTALL_PREFIX}/lib")
 endmacro()
 
 #################################################

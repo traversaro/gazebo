@@ -27,6 +27,7 @@ set (plugins
   Issue1208Plugin
   ModelTrajectoryTestPlugin
   PluginInterfaceTest
+  ReverseDestructionOrderTestPlugin
   SlowLoadingSensorPlugin
   SpringTestPlugin
   WorldSpawnModelPlugin

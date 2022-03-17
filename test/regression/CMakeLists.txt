@@ -49,6 +49,7 @@ set(tests
   2896_gazebo_subnamespace.cc
   2902_performance_metrics_deadlock.cc
   3125_slow_loading_model_spawn.cc
+  3XXX_reverse_destruction_order.cc
 )
 gz_build_tests(${tests} EXTRA_LIBS gazebo_test_fixture)
 

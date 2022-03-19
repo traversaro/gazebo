@@ -8,12 +8,13 @@
       <uri>model://sun</uri>
     </include>
     <model name="parent_model">
+      <plugin name="plugin0" filename="libReverseDestructionOrderTestPlugin.so" />
+      <plugin name="plugin1" filename="libReverseDestructionOrderTestPlugin.so" />
       <model name="nested_model">
         <link name="nested_link" />
-        <plugin name="plugin1" filename="libReverseDestructionOrderTestPlugin.so" />
         <plugin name="plugin2" filename="libReverseDestructionOrderTestPlugin.so" />
+        <plugin name="plugin3" filename="libReverseDestructionOrderTestPlugin.so" />
       </model>
-      <plugin name="plugin3" filename="libReverseDestructionOrderTestPlugin.so" />
     </model>
   </world>
 </sdf>

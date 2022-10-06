@@ -44,9 +44,6 @@
 #include "gazebo/transport/Subscriber.hh"
 #include "gazebo/util/system.hh"
 
-/// \brief Explicit instantiation for typed SingletonT.
-GZ_SINGLETON_DECLARE(GZ_TRANSPORT_VISIBLE, gazebo, transport, TopicManager)
-
 namespace gazebo
 {
   namespace transport
@@ -272,4 +269,8 @@ namespace gazebo
     /// \}
   }
 }
+
+/// \brief Explicit instantiation for typed SingletonT.
+extern template class GZ_TRANSPORT_VISIBLE ::SingletonT<gazebo::transport::TopicManager>;
+
 #endif

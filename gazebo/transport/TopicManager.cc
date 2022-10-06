@@ -48,6 +48,8 @@ class NodeProcess_TBB
   private: std::vector<NodePtr> *nodes;
 };
 
+//////////////////////////////////////////////////
+template class GZ_TRANSPORT_VISIBLE ::SingletonT<gazebo::transport::TopicManager>;
 
 //////////////////////////////////////////////////
 TopicManager::TopicManager()

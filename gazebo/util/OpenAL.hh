@@ -33,9 +33,6 @@
 
 #ifdef HAVE_OPENAL
 
-/// \brief Explicit instantiation for typed SingletonT.
-GZ_SINGLETON_DECLARE(GZ_UTIL_VISIBLE, gazebo, util, OpenAL)
-
 namespace gazebo
 {
   namespace util
@@ -201,5 +198,10 @@ namespace gazebo
     /// \}
   }
 }
+
+/// \brief Explicit instantiation for typed SingletonT.
+template class GZ_UTIL_VISIBLE ::SingletonT<gazebo::util::OpenAL>;
+
+
 #endif
 #endif

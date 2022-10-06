@@ -27,9 +27,6 @@
 
 #define GZ_LOG_VERSION "1.0"
 
-/// \brief Explicit instantiation for typed SingletonT.
-GZ_SINGLETON_DECLARE(GZ_UTIL_VISIBLE, gazebo, util, LogRecord)
-
 namespace gazebo
 {
   namespace util
@@ -272,4 +269,8 @@ namespace gazebo
     /// \}
   }
 }
+
+/// \brief Explicit instantiation for typed SingletonT.
+template class GZ_UTIL_VISIBLE ::SingletonT<gazebo::util::LogRecord>;
+
 #endif

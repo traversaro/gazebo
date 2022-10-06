@@ -29,9 +29,6 @@
 #include "gazebo/util/UtilTypes.hh"
 #include "gazebo/util/system.hh"
 
-/// \brief Explicit instantiation for typed SingletonT.
-GZ_SINGLETON_DECLARE(GZ_UTIL_VISIBLE, gazebo, util, DiagnosticManager)
-
 namespace gazebo
 {
   namespace util
@@ -190,4 +187,8 @@ namespace gazebo
     /// \}
   }
 }
+
+/// \brief Explicit instantiation for typed SingletonT.
+template class GZ_UTIL_VISIBLE ::SingletonT<gazebo::util::DiagnosticManager>;
+
 #endif

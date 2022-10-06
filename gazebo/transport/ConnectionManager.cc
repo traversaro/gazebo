@@ -68,6 +68,9 @@ class TopicManagerConnectionTask
 };
 
 //////////////////////////////////////////////////
+template class GZ_TRANSPORT_VISIBLE ::SingletonT<gazebo::transport::ConnectionManager>;
+
+//////////////////////////////////////////////////
 ConnectionManager::ConnectionManager()
 {
   this->tmpIndex = 0;

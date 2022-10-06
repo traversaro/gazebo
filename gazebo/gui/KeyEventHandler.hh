@@ -25,9 +25,6 @@
 #include "gazebo/common/SingletonT.hh"
 #include "gazebo/util/system.hh"
 
-/// \brief Explicit instantiation for typed SingletonT.
-GZ_SINGLETON_DECLARE(GZ_GUI_VISIBLE, gazebo, gui, KeyEventHandler)
-
 namespace gazebo
 {
   namespace common
@@ -154,4 +151,8 @@ namespace gazebo
     };
   }
 }
+
+/// \brief Explicit instantiation for typed SingletonT.
+template class GZ_GUI_VISIBLE ::SingletonT<gazebo::gui::KeyEventHandler>;
+
 #endif

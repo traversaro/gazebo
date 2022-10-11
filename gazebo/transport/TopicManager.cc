@@ -66,6 +66,12 @@ TopicManager::~TopicManager()
 }
 
 //////////////////////////////////////////////////
+static TopicManager* Instance()
+{
+  return SingletonT<TopicManager>::Instance();
+}
+
+//////////////////////////////////////////////////
 void TopicManager::Init()
 {
   this->advertisedTopics.clear();

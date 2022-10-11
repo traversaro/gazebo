@@ -89,6 +89,12 @@ ConnectionManager::~ConnectionManager()
 }
 
 //////////////////////////////////////////////////
+static ConnectionManager* Instance()
+{
+  return SingletonT<ConnectionManager>::Instance();
+}
+
+//////////////////////////////////////////////////
 bool ConnectionManager::Init(const std::string &_masterHost,
                              unsigned int _masterPort,
                              uint32_t _timeoutIterations)

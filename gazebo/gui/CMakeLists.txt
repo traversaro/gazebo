@@ -196,6 +196,12 @@ target_compile_definitions(gazebo_gui
   PRIVATE BUILDING_DLL_GZ_GUI
 )
 
+if(Graphviz_DEFINITIONS)
+  target_compile_definitions(gazebo_gui
+    PRIVATE ${Graphviz_DEFINITIONS}
+  )
+endif()
+
 target_link_libraries(gazebo_gui
   libgazebo_client
   gazebo_common

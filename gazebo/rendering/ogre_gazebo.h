@@ -35,7 +35,12 @@
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreSceneNode.h>
+
+// See https://github.com/OGRECave/ogre/commit/92927f30b689de3202f5a23181c43178b972c45c
+#if (OGRE_VERSION_MAJOR == 1 && OGRE_VERSION_MINOR == 12 && OGRE_VERSION_PATH >= 4) || (OGRE_VERSION_MAJOR >= 13)
 #include <OGRE/OgreVector3.h>
+#endif
+
 #include <OGRE/OgreMatrix4.h>
 #include <OGRE/OgreManualObject.h>
 #include <OGRE/OgreMaterialManager.h>
@@ -66,7 +71,7 @@
 #if OGRE_VERSION_MAJOR > 1 || OGRE_VERSION_MINOR >= 7
 #include <OGRE/RTShaderSystem/OgreRTShaderSystem.h>
 #include <OGRE/RTShaderSystem/OgreShaderProgramSet.h>
-#include <OGRE/RTShaderSystem/OgreShaderGLSLProgramWriter.h>
+//#include <OGRE/RTShaderSystem/OgreShaderGLSLProgramWriter.h>
 #include <OGRE/RTShaderSystem/OgreShaderProgramWriterManager.h>
 #include <OGRE/RTShaderSystem/OgreShaderFunction.h>
 #include <OGRE/RTShaderSystem/OgreShaderProgram.h>
@@ -92,7 +97,7 @@
 #include <OGRE/OgreWindowEventUtilities.h>
 #endif
 
-#if OGRE_VERSION_MAJOR == 1 && OGRE_VERSION_MINOR >= 11
+#if (OGRE_VERSION_MAJOR == 1 && OGRE_VERSION_MINOR >= 11) || (OGRE_VERSION_MAJOR >= 13)
 #define GZ_OGRE_SET_MATERIAL_BY_NAME(ptr, name) \
   (ptr)->setMaterial(Ogre::MaterialManager::getSingleton().getByName(name))
 #else

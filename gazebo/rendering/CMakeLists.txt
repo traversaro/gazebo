@@ -23,7 +23,6 @@ set (sources
   COMVisual.cc
   ContactVisual.cc
   Conversions.cc
-  CustomPSSMShadowCameraSetup.cc
   DepthCamera.cc
   Distortion.cc
   DynamicLines.cc
@@ -88,7 +87,6 @@ set (headers
   COMVisual.hh
   ContactVisual.hh
   Conversions.hh
-  CustomPSSMShadowCameraSetup.hh
   DepthCamera.hh
   Distortion.hh
   DynamicLines.hh
@@ -145,6 +143,12 @@ set (internal_headers
 if (${OGRE_VERSION} VERSION_GREATER 1.7.4)
   add_subdirectory(deferred_shading)
 endif()
+
+if (${OGRE_VERSION} VERSION_LESS 13)
+  list(APPEND sources CustomPSSMShadowCameraSetup.cc)
+  list(APPEND headers CustomPSSMShadowCameraSetup.hh)
+endif()
+
 
 add_subdirectory(selection_buffer)
 add_subdirectory(skyx)

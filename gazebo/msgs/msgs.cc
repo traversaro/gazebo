@@ -118,7 +118,7 @@ namespace gazebo
 
       std::string *serialized_data = pkg.mutable_serialized_data();
       if (!message.IsInitialized())
-        gzthrow("Can't serialize message of type[" + message.GetTypeName() +
+        gzthrow("Can't serialize message of type[" + std::string(message.GetTypeName()) +
             "] because it is missing required fields");
 
       if (!message.SerializeToString(serialized_data))

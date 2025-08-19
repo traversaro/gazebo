@@ -370,7 +370,7 @@ void TopicCurve::UpdateCurve(google::protobuf::Message *_msg,
     if (!field)
       continue;
 
-    std::string fieldName = field->name();
+    std::string fieldName = std::string(field->name());
 
     // Check if message has timestamp and use it if it exists and is
     // a top level msg field.

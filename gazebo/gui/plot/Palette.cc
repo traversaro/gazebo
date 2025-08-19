@@ -1179,7 +1179,7 @@ void Palette::FillFromMsg(google::protobuf::Message *_msg,
     if (!field)
       return;
 
-    auto name = field->name();
+    auto name = std::string(field->name());
 
     if (field->is_repeated())
       continue;

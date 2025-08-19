@@ -228,7 +228,7 @@ namespace gazebo
                   const google::protobuf::Message &_message)
               {
                 transport::PublisherPtr pub = this->Advertise(_topic,
-                    _message.GetTypeName());
+                    std::string(_message.GetTypeName()));
                 pub->WaitForConnection();
 
                 pub->Publish(_message, true);

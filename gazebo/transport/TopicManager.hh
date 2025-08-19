@@ -160,7 +160,7 @@ namespace gazebo
                 if (!msg)
                   gzthrow("Advertise requires a google protobuf type");
 
-                return this->Advertise(_topic, msg->GetTypeName(), _queueLimit,
+                return this->Advertise(_topic, std::string(msg->GetTypeName()), _queueLimit,
                         _hzRate);
               }
 

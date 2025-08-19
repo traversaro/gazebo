@@ -41,10 +41,10 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
                                OutputDirectory *_generator_context,
                                std::string * /*_error*/) const
 {
-  std::string headerFilename = _file->name();
+  std::string headerFilename = std::string(_file->name());
   boost::replace_last(headerFilename, ".proto", ".pb.h");
 
-  std::string sourceFilename = _file->name();
+  std::string sourceFilename = std::string(_file->name());
   boost::replace_last(sourceFilename, ".proto", ".pb.cc");
 
   // Suppress expected warnings
@@ -80,12 +80,12 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
         _generator_context->OpenForInsert(headerFilename, "namespace_scope"));
     io::Printer printer(output.get(), '$');
 
-    std::string package = _file->package();
+    std::string package = std::string(_file->package());
     boost::replace_all(package, ".", "::");
 
     std::string ptrType = "typedef boost::shared_ptr<" + package
-      + "::" + _file->message_type(0)->name() + "> "
-      + _file->message_type(0)->name() + "Ptr;\n";
+      + "::" + std::string(_file->message_type(0)->name()) + "> "
+      + std::string(_file->message_type(0)->name()) + "Ptr;\n";
 
     printer.Print(ptrType.c_str(), "name", "namespace_scope");
   }
@@ -96,12 +96,12 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
         _generator_context->OpenForInsert(headerFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
-    std::string package = _file->package();
+    std::string package = std::string(_file->package());
     boost::replace_all(package, ".", "::");
 
     std::string constType = "typedef const boost::shared_ptr<" + package
-      + "::" + _file->message_type(0)->name() + " const> Const"
-      + _file->message_type(0)->name() + "Ptr;";
+      + "::" + std::string(_file->message_type(0)->name()) + " const> Const"
+      + std::string(_file->message_type(0)->name()) + "Ptr;";
 
     printer.Print(constType.c_str(), "name", "global_scope");
   }
@@ -112,12 +112,12 @@ bool GazeboGenerator::Generate(const FileDescriptor *_file,
         _generator_context->OpenForInsert(sourceFilename, "global_scope"));
     io::Printer printer(output.get(), '$');
 
-    std::string package = _file->package();
+    std::string package = std::string(_file->package());
     boost::replace_all(package, ".", "::");
 
-    std::string name = _file->message_type(0)->name();
+    std::string name = std::string(_file->message_type(0)->name());
 
-    std::string constType = "GZ_REGISTER_STATIC_MSG(\"" + _file->package() +
+    std::string constType = "GZ_REGISTER_STATIC_MSG(\"" + std::string(_file->package()) +
       "." + name + "\", " + name + ")\n";
     printer.Print(constType.c_str(), "name", "namespace_scope");
   }

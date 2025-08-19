@@ -136,7 +136,7 @@ namespace gazebo
                 if ((m = dynamic_cast<google::protobuf::Message*>(&test))
                     == NULL)
                   gzthrow("Message type must be a google::protobuf type\n");
-                return m->GetTypeName();
+                return std::string(m->GetTypeName());
               }
 
       // documentation inherited

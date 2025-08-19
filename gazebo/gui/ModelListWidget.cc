@@ -1747,7 +1747,10 @@ void ModelListWidget::FillPropertyTree(const msgs::SphericalCoordinates &_msg,
   else
   {
     for (int i = 0; i < surfaceModelEnum->value_count(); ++i)
-      types << surfaceModelEnum->value(i)->name().c_str();
+    {
+      std::string  surfaceModelEnumStr(surfaceModelEnum->value(i)->name());
+      types << surfaceModelEnumStr.c_str();
+    }
   }
 
   item->setAttribute("enumNames", types);
@@ -3069,7 +3072,8 @@ void ModelListWidget::FillPropertyTree(const msgs::Physics &_msg,
     }
     else
     {
-      types << engineTypeEnum->value(_msg.type()-1)->name().c_str();
+      std::string engineTypeEnumStr = std::string(engineTypeEnum->value(_msg.type()-1)->name());
+      types << engineTypeEnumStr.c_str();
     }
 
     item->setAttribute("enumNames", types);

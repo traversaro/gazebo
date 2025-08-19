@@ -595,7 +595,7 @@ QWidget *ConfigWidget::Parse(google::protobuf::Message *_msg,
     if (!ref)
       return NULL;
 
-    std::string name = field->name();
+    std::string name = std::string(field->name());
 
     // Parse each field in the message
     // TODO parse repeated fields
@@ -753,8 +753,9 @@ QWidget *ConfigWidget::Parse(google::protobuf::Message *_msg,
               std::string geometryTypeStr;
               if (typeValueDescriptor)
               {
+                std::string typeName = std::string(typeValueDescriptor->name());
                 geometryTypeStr =
-                    QString(typeValueDescriptor->name().c_str()).toLower().
+                    QString(typeName.c_str()).toLower().
                     toStdString();
               }
 
@@ -779,7 +780,7 @@ QWidget *ConfigWidget::Parse(google::protobuf::Message *_msg,
                 const google::protobuf::Descriptor *geomValueDescriptor =
                     geomValueMsg->GetDescriptor();
 
-                std::string geomMsgName = geomField->message_type()->name();
+                std::string geomMsgName = std::string(geomField->message_type()->name());
                 if (geomMsgName == "BoxGeom" || geomMsgName == "MeshGeom")
                 {
                   int fieldIdx = (geomMsgName == "BoxGeom") ? 0 : 1;
@@ -1001,7 +1002,7 @@ QWidget *ConfigWidget::Parse(google::protobuf::Message *_msg,
               const google::protobuf::EnumValueDescriptor *valueDescriptor =
                   descriptor->value(j);
               if (valueDescriptor)
-                enumValues.push_back(valueDescriptor->name());
+                enumValues.push_back(std::string(valueDescriptor->name()));
             }
             configChildWidget =
                 this->CreateEnumWidget(name, enumValues, _level);
@@ -1015,7 +1016,7 @@ QWidget *ConfigWidget::Parse(google::protobuf::Message *_msg,
 
             newFieldWidget = configChildWidget;
           }
-          this->UpdateEnumWidget(configChildWidget, value->name());
+          this->UpdateEnumWidget(configChildWidget, std::string(value->name()));
           break;
         }
         default:
@@ -2086,7 +2087,7 @@ void ConfigWidget::UpdateMsg(google::protobuf::Message *_msg,
     if (!ref)
       return;
 
-    std::string name = field->name();
+    std::string name = std::string(field->name());
 
     // Update each field in the message
     // TODO update repeated fields

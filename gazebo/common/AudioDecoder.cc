@@ -47,7 +47,13 @@ void AudioDecoder::Cleanup()
 #ifdef HAVE_FFMPEG
   // Close the codec
   if (this->codecCtx)
+  {
+#if LIBAVFORMAT_VERSION_MAJOR < 59
     avcodec_close(this->codecCtx);
+#else
+    avcodec_free_context(&this->codecCtx);
+#endif
+  }
 
   // Close the audio file
   if (this->formatCtx)

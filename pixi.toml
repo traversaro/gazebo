@@ -1,0 +1,96 @@
+[workspace]
+name = "gazebo"
+description = "gazebo"
+channels = ["https://prefix.dev/conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "win-64", "osx-64", "osx-arm64"]
+
+# Workaround until https://gitlab.kitware.com/cmake/cmake/-/merge_requests/9200
+# is released
+[activation.env]
+CMAKE_INSTALL_PREFIX="$CONDA_PREFIX"
+# ccache support
+CMAKE_C_COMPILER_LAUNCHER="ccache"
+CMAKE_CXX_COMPILER_LAUNCHER="ccache"
+CCACHE_BASEDIR="$PIXI_PROJECT_ROOT"
+
+[target.win-64.activation.env]
+CMAKE_INSTALL_PREFIX="$CONDA_PREFIX/Library"
+
+[tasks]
+configure = { cmd = [
+    "cmake",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBUILD_TESTING:BOOL=ON",
+    # Use the cross-platform Ninja generator
+    "-G",
+    "Ninja",
+    # The source is in the root directory
+    "-S",
+    ".",
+    # We wanna build in the .build directory
+    "-B",
+    ".build",
+]}
+
+# Keep a fixed number of jobs to avoid OOM
+build = { cmd = "cmake --build .build --config Release --parallel 10", depends-on = ["configure"] }
+test = { cmd = "ctest --test-dir .build --build-config Release", depends-on = ["build"] }
+install = { cmd = ["cmake", "--install", ".build", "--config", "Release"], depends-on = ["build"] }
+uninstall = { cmd = ["cmake", "--build", ".build", "--target", "uninstall"]}
+
+[dependencies]
+cmake = "*"
+c-compiler = "*"
+cxx-compiler = "*"
+ninja = "*"
+pkg-config = "*"
+ccache = "*"
+libabseil = "*"
+libprotobuf = "*"
+libsdformat = "9.*"
+libignition-cmake2 = "*"
+libignition-math6 = "*"
+libignition-transport8 = "*"
+libignition-common3 = "*"
+# Workaround for https://github.com/conda-forge/gazebo-feedstock/pull/143
+libignition-fuel-tools4 = ">=4.6"
+libignition-msgs5 = "*"
+ogre = "1.10.*"
+qt-main = "*"
+freeimage = "*"
+curl = "*"
+tbb-devel = "*"
+qwt = "*"
+tinyxml2 = "*"
+libccd-double = "*"
+libboost-devel = "1.86.*"
+libcurl = "*"
+tinyxml = "*"
+gts = "*"
+bzip2 = "*"
+zlib = "*"
+ffmpeg = "8.*"
+graphviz = "*"
+libgdal = "*"
+libusb = "*"
+dartsim-cpp = "*"
+simbody = "*"
+hdf5 = "*"
+openal-soft = "*"
+libode = "*"
+assimp = "*"
+urdfdom = "*"
+libblas = "*"
+libcblas = "*"
+
+[target.unix.dependencies]
+# Bullet is not detected on win for some reason
+bullet-cpp = "*"
+libtar = "*"
+
+[target.linux.dependencies]
+libuuid = "*"
+
+[target.win.dependencies]
+dlfcn-win32 = "*"
+tiny-process-library = "*"

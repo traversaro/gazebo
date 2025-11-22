@@ -36,6 +36,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/version.hpp>
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -407,9 +408,13 @@ namespace gazebo
 
       /// \brief Callback method when connected
       /// \param[in] _error Error code thrown during connection
+    #if BOOST_VERSION >= 108800
+      private: void OnConnect(const boost::system::error_code &_error);
+    #else
       /// \param[in] _endPointIter Pointer to resolver iterator
       private: void OnConnect(const boost::system::error_code &_error,
-                  boost::asio::ip::tcp::resolver::iterator _endPointIter);
+          boost::asio::ip::tcp::resolver::iterator _endPointIter);
+    #endif
 
       /// \brief Socket pointer
       private: boost::asio::ip::tcp::socket *socket;

@@ -18,6 +18,12 @@
 #include <boost/bind/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>
+#include <boost/version.hpp>
+
+#if BOOST_VERSION >= 108800
+#include <boost/asio/executor_work_guard.hpp>
+#endif
+
 #include "gazebo/transport/IOManager.hh"
 
 namespace gazebo
@@ -27,11 +33,17 @@ namespace transport
 /////////////////////////////////////////////////
 class IOManagerPrivate
 {
-  /// \brief IO service.
-  public: boost::asio::io_service *io_service = nullptr;
+  /// \brief IO context/service.
+  public: AsioIO *io = nullptr;
 
+#if BOOST_VERSION >= 108800
+  /// \brief Work guard keeps the io_context running.
+  public: boost::asio::executor_work_guard<AsioIO::executor_type> *work =
+      nullptr;
+#else
   /// \brief Use io_service::work to keep the io_service running in thread.
   public: boost::asio::io_service::work *work = nullptr;
+#endif
 
   /// \brief Reference count of connections using this IOManager.
   public: std::atomic_int count;
@@ -44,12 +56,18 @@ class IOManagerPrivate
 IOManager::IOManager()
   : dataPtr(new IOManagerPrivate)
 {
-  this->dataPtr->io_service = new boost::asio::io_service;
+  this->dataPtr->io = new AsioIO;
+#if BOOST_VERSION >= 108800
+  this->dataPtr->work =
+      new boost::asio::executor_work_guard<AsioIO::executor_type>(
+      this->dataPtr->io->get_executor());
+#else
   this->dataPtr->work = new boost::asio::io_service::work(
-      *this->dataPtr->io_service);
+      *this->dataPtr->io);
+#endif
   this->dataPtr->count = 0;
   this->dataPtr->thread = new boost::thread(boost::bind(
-      &boost::asio::io_service::run, this->dataPtr->io_service));
+      &AsioIO::run, this->dataPtr->io));
 }
 
 /////////////////////////////////////////////////
@@ -60,8 +78,8 @@ IOManager::~IOManager()
   delete this->dataPtr->work;
   this->dataPtr->work = nullptr;
 
-  delete this->dataPtr->io_service;
-  this->dataPtr->io_service = nullptr;
+  delete this->dataPtr->io;
+  this->dataPtr->io = nullptr;
 
   delete this->dataPtr;
   this->dataPtr = nullptr;
@@ -70,8 +88,12 @@ IOManager::~IOManager()
 /////////////////////////////////////////////////
 void IOManager::Stop()
 {
-  this->dataPtr->io_service->reset();
-  this->dataPtr->io_service->stop();
+#if BOOST_VERSION >= 108800
+  this->dataPtr->io->restart();
+#else
+  this->dataPtr->io->reset();
+#endif
+  this->dataPtr->io->stop();
   if (this->dataPtr->thread)
   {
     this->dataPtr->thread->join();
@@ -81,9 +103,9 @@ void IOManager::Stop()
 }
 
 /////////////////////////////////////////////////
-boost::asio::io_service &IOManager::GetIO()
+AsioIO &IOManager::GetIO()
 {
-  return *this->dataPtr->io_service;
+  return *this->dataPtr->io;
 }
 
 /////////////////////////////////////////////////

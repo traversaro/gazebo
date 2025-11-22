@@ -18,12 +18,18 @@
 #define GAZEBO_TRANSPORT_IOMANAGER_HH_
 
 #include <boost/asio.hpp>
+#include <boost/version.hpp>
 #include "gazebo/util/system.hh"
 
 namespace gazebo
 {
   namespace transport
   {
+#if BOOST_VERSION >= 108800
+    using AsioIO = boost::asio::io_context;
+#else
+    using AsioIO = boost::asio::io_service;
+#endif
     // Forward declare private class.
     class IOManagerPrivate;
 
@@ -40,9 +46,9 @@ namespace gazebo
       /// \brief Destructor
       public: ~IOManager();
 
-      /// \brief Get handle to boost::asio IO service
-      /// \return Handle to boost::asio IO service
-      public: boost::asio::io_service &GetIO();
+      /// \brief Get handle to boost::asio IO object
+      /// \return Handle to boost::asio IO object
+      public: AsioIO &GetIO();
 
       /// \brief Increment the event count by 1
       public: void IncCount();

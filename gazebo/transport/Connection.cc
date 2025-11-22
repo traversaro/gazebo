@@ -52,6 +52,7 @@
 #include <boost/bind/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/version.hpp>
 
 #include "gazebo/common/Console.hh"
 #include "gazebo/msgs/msgs.hh"
@@ -65,6 +66,33 @@ using namespace transport;
 
 extern void dummy_callback_fn(uint32_t);
 
+namespace
+{
+#if BOOST_VERSION >= 108800
+inline uint32_t AddressToUInt(const boost::asio::ip::address_v4 &_addr)
+{
+  return _addr.to_uint();
+}
+
+inline boost::asio::ip::address_v4 MakeAddressV4(
+    const std::string &_value)
+{
+  return boost::asio::ip::make_address_v4(_value);
+}
+#else
+inline uint32_t AddressToUInt(const boost::asio::ip::address_v4 &_addr)
+{
+  return _addr.to_ulong();
+}
+
+inline boost::asio::ip::address_v4 MakeAddressV4(
+    const std::string &_value)
+{
+  return boost::asio::ip::address_v4::from_string(_value);
+}
+#endif
+}
+
 unsigned int Connection::idCounter = 0;
 IOManager *Connection::iomanager = NULL;
 
@@ -73,7 +101,7 @@ IOManager *Connection::iomanager = NULL;
 // is stolen from adress::is_unspecified function in boost v1.52.
 static bool addressIsUnspecified(const boost::asio::ip::address_v4 &_addr)
 {
-  return _addr.to_ulong() == 0;
+  return AddressToUInt(_addr) == 0;
 }
 
 // Version 1.52 of boost has an address::is_loopback function, but
@@ -81,7 +109,7 @@ static bool addressIsUnspecified(const boost::asio::ip::address_v4 &_addr)
 // is stolen from adress::is_loopback function in boost v1.52.
 static bool addressIsLoopback(const boost::asio::ip::address_v4 &_addr)
 {
-  return (_addr.to_ulong() & 0xFF000000) == 0x7F000000;
+  return (AddressToUInt(_addr) & 0xFF000000) == 0x7F000000;
 }
 
 //////////////////////////////////////////////////
@@ -150,9 +178,33 @@ bool Connection::Connect(const std::string &_host, unsigned int _port)
   if (httpIndex != static_cast<int>(std::string::npos))
     host = _host.substr(7, _host.size() - 7);
 
-  // Resolve the host name into an IP address
-  boost::asio::ip::tcp::resolver::iterator end;
   boost::asio::ip::tcp::resolver resolver(iomanager->GetIO());
+
+#if BOOST_VERSION >= 108800
+  boost::asio::ip::tcp::endpoint endpoint;
+  bool endpointFound = false;
+  try
+  {
+    auto endpoints = resolver.resolve(host, service,
+        boost::asio::ip::resolver_base::numeric_service);
+
+    for (auto iter = endpoints.begin(); iter != endpoints.end(); ++iter)
+    {
+      if (iter->endpoint().address().is_v4())
+      {
+        endpoint = iter->endpoint();
+        endpointFound = true;
+        break;
+      }
+    }
+  }
+  catch(...)
+  {
+    gzerr << "Unable to resolve uri[" << host << ":" << _port << "]\n";
+    return false;
+  }
+#else
+  boost::asio::ip::tcp::resolver::iterator end;
   boost::asio::ip::tcp::resolver::query query(host, service,
       boost::asio::ip::resolver_query_base::numeric_service);
   boost::asio::ip::tcp::resolver::iterator endpointIter;
@@ -161,13 +213,11 @@ bool Connection::Connect(const std::string &_host, unsigned int _port)
   {
     endpointIter = resolver.resolve(query);
 
-    // Find the first valid IPv4 address
     for (; endpointIter != end &&
            !(*endpointIter).endpoint().address().is_v4(); ++endpointIter)
     {
     }
 
-    // Make sure we didn't run off the end of the list.
     if (endpointIter == end)
     {
       gzerr << "Unable to resolve uri[" << _host << ":" << _port << "]\n";
@@ -179,15 +229,30 @@ bool Connection::Connect(const std::string &_host, unsigned int _port)
     gzerr << "Unable to resolve uri[" << host << ":" << _port << "]\n";
     return false;
   }
+#endif
+
+#if BOOST_VERSION >= 108800
+  if (!endpointFound)
+  {
+    gzerr << "Unable to resolve uri[" << _host << ":" << _port << "]\n";
+    return false;
+  }
+#endif
 
   this->connectError = false;
   this->remoteURI.clear();
 
   // Use async connect so that we can use a custom timeout. This is useful
   // when trying to detect network errors.
+#if BOOST_VERSION >= 108800
+  this->socket->async_connect(endpoint,
+      common::weakBind(&Connection::OnConnect, this->shared_from_this(),
+        boost::asio::placeholders::error));
+#else
   this->socket->async_connect(*endpointIter++,
       common::weakBind(&Connection::OnConnect, this->shared_from_this(),
         boost::asio::placeholders::error, endpointIter));
+#endif
 
   // Wait for at most 60 seconds for a connection to be established.
   // The connectionCondition notification occurs in ::OnConnect.
@@ -690,6 +755,28 @@ boost::asio::ip::tcp::endpoint Connection::GetLocalEndpoint()
   if (hostname && !std::string(hostname).empty())
   {
     boost::asio::ip::tcp::resolver resolver(iomanager->GetIO());
+    bool resolved = false;
+
+#if BOOST_VERSION >= 108800
+    try
+    {
+      auto endpoints = resolver.resolve(hostname, "");
+      for (auto iter = endpoints.begin(); iter != endpoints.end(); ++iter)
+      {
+        auto testEndPoint = iter->endpoint();
+        if (!addressIsUnspecified(testEndPoint.address().to_v4()))
+        {
+          address = testEndPoint.address().to_v4();
+          resolved = true;
+          break;
+        }
+      }
+    }
+    catch(...)
+    {
+      resolved = false;
+    }
+#else
     boost::asio::ip::tcp::resolver::query query(hostname, "");
     boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve(query);
     boost::asio::ip::tcp::resolver::iterator end;
@@ -703,13 +790,15 @@ boost::asio::ip::tcp::endpoint Connection::GetLocalEndpoint()
       if (!addressIsUnspecified(testEndPoint.address().to_v4()))
       {
         address = testEndPoint.address().to_v4();
+        resolved = true;
         break;
       }
     }
+#endif
 
     // Complain if GAZEBO_HOSTNAME was set, but we were not able to get
     // a valid address.
-    if (addressIsUnspecified(address))
+    if (!resolved && addressIsUnspecified(address))
       gzerr << "GAZEBO_HOSTNAME[" << hostname << "] is invalid. "
             << "We will fallback onto GAZEBO_IP.";
   }
@@ -724,7 +813,7 @@ boost::asio::ip::tcp::endpoint Connection::GetLocalEndpoint()
             << "] is invalid. We will still try to use it, be warned.\n";
     }
 
-    address = boost::asio::ip::address_v4::from_string(ip);
+    address = MakeAddressV4(ip);
   }
 
   // Try to automatically find a valid address if GAZEBO_IP and
@@ -774,7 +863,7 @@ boost::asio::ip::tcp::endpoint Connection::GetLocalEndpoint()
         if (!ValidateIP(host))
           continue;
 
-        address = boost::asio::ip::address_v4::from_string(host);
+        address = MakeAddressV4(host);
 
         // Also make sure that the IP address is not a loopback interface.
         if (!addressIsLoopback(address))
@@ -868,7 +957,7 @@ boost::asio::ip::tcp::endpoint Connection::GetLocalEndpoint()
       "but will almost certainly not work if you have remote processes."
       "Report to the disc-zmq development team to seek a fix." << std::endl;
   }
-  address = boost::asio::ip::address_v4::from_string(retAddr);
+  address = MakeAddressV4(retAddr);
 #endif
   }
 
@@ -923,6 +1012,18 @@ std::string Connection::GetHostname(boost::asio::ip::tcp::endpoint _ep)
   else
   {
     boost::asio::ip::tcp::resolver resolver(iomanager->GetIO());
+#if BOOST_VERSION >= 108800
+    try
+    {
+      auto endpoints = resolver.resolve(_ep);
+      for (const auto &entry : endpoints)
+        result = entry.host_name();
+    }
+    catch(...)
+    {
+      // fall back to empty result
+    }
+#else
     boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve(_ep);
     boost::asio::ip::tcp::resolver::iterator end;
 
@@ -931,6 +1032,7 @@ std::string Connection::GetHostname(boost::asio::ip::tcp::endpoint _ep)
       result = (*iter).host_name();
       ++iter;
     }
+#endif
   }
 
   return result;
@@ -948,9 +1050,14 @@ std::string Connection::GetLocalHostname()
   return GetHostname(GetLocalEndpoint());
 }
 
+#if BOOST_VERSION >= 108800
+//////////////////////////////////////////////////
+void Connection::OnConnect(const boost::system::error_code &_error)
+#else
 //////////////////////////////////////////////////
 void Connection::OnConnect(const boost::system::error_code &_error,
     boost::asio::ip::tcp::resolver::iterator /*_endPointIter*/)
+#endif
 {
   // This function is called when a connection is successfully (or
   // unsuccessfully) established.
